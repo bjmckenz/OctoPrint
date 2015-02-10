@@ -46,6 +46,25 @@ body {
   }
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
+.actioncol {
+  text-align: center;
+  .nowrap;
+
+  a {
+    text-decoration: none;
+    color: #000;
+
+    &.disabled {
+      color: #ccc;
+      cursor: default;
+    }
+  }
+}
+
 .navbar-inner-color (@base) {
   @top: lighten(@base, 25%);
   @bottom: darken(@base, 15%);
@@ -203,28 +222,13 @@ table {
     // gcode files
     &.gcode_files_name {
       text-overflow: ellipsis;
-      white-space: nowrap;
       text-align: left;
-    }
-
-    &.gcode_files_size {
-      text-align: right;
-      width: 55px;
+      .nowrap;
     }
 
     &.gcode_files_action {
-      text-align: center;
-      width: 70px;
-
-      a {
-        text-decoration: none;
-        color: #000;
-
-        &.disabled {
-          color: #ccc;
-          cursor: default;
-        }
-      }
+      width: 90px;
+      .actioncol;
     }
 
     // timelapse files
@@ -239,18 +243,8 @@ table {
     }
 
     &.timelapse_files_action {
-      text-align: center;
       width: 45px;
-
-      a {
-        text-decoration: none;
-        color: #000;
-
-        &.disabled {
-          color: #ccc;
-          cursor: default;
-        }
-      }
+      .actioncol;
     }
 
     // user settings
@@ -265,18 +259,8 @@ table {
     }
 
     &.settings_users_actions {
-      text-align: center;
       width: 60px;
-
-      a {
-        text-decoration: none;
-        color: #000;
-
-        &.disabled {
-          color: #ccc;
-          cursor: default;
-        }
-      }
+      .actioncol;
     }
 
     // log files
@@ -296,18 +280,24 @@ table {
     }
 
     &.settings_logs_action {
-      text-align: center;
       width: 70px;
+      .actioncol;
+    }
 
-      a {
-        text-decoration: none;
-        color: #000;
+    // Printer profiles
+    &.settings_printerProfiles_profiles_name {
+      text-overflow: ellipsis;
+      text-align: left;
+    }
 
-        &.disabled {
-          color: #ccc;
-          cursor: default;
-        }
-      }
+    &.settings_printerProfiles_profiles_model {
+      text-align: left;
+      width: 250px;
+    }
+
+    &.settings_printerProfiles_profiles_action {
+      width: 80px;
+      .actioncol;
     }
 
   }
@@ -343,7 +333,7 @@ ul.dropdown-menu li a {
 
 /** Connection settings */
 
-#connection_ports, #connection_baudrates {
+#connection_ports, #connection_baudrates, #connection_printers {
   width: 100%;
 }
 
@@ -389,6 +379,10 @@ ul.dropdown-menu li a {
 
 #webcam_container {
   width: 100%;
+  position: relative;
+  outline: none;
+
+  //min-height: 440px;
 
   .flipH {
     -webkit-transform: scaleX(-1);
@@ -404,21 +398,91 @@ ul.dropdown-menu li a {
     -webkit-transform: scaleX(-1) scaleY(-1);
     -moz-transform: scaleX(-1) scaleY(-1);
   }
+
+  .keycontrol_overlay {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 85%;
+    color: white;
+    padding: 0;
+
+    kbd {
+      border: 1px solid #eeeeee;
+      border-radius: 3px;
+      margin-left: 2px;
+      margin-right: 2px;
+      font-size: 90%;
+      padding: 2px;
+      min-width: 1em;
+    }
+
+    .keycontrol_overlay_heading {
+      position: relative;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    .keycontrol_overlay_column {
+      position: relative;
+      width: 45%;
+      padding: 10px;
+      float: left;
+    }
+  }
 }
 
 /** GCODE file manager */
 
 #files {
-  .popover {
-    font-size: 85%;
+  .gcode_files {
+    @padding: 5px;
+    @scrollBar: 5px;
+    @line-height: 20px;
 
-    p:last-child {
-      margin-bottom: 0;
+    padding-right: @scrollBar + 2px;
+
+    .entry {
+      padding: @padding;
+      line-height: @line-height;
+      border-bottom: 1px solid #ddd;
+      position: relative;
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      .title {
+        text-overflow: ellipsis;
+        word-break: break-all;
+      }
+
+      .uploaded, .size, .additionalInfo {
+        font-size: 85%;
+        color: #999;
+      }
+
+      .action-buttons {
+        position: absolute;
+        bottom: @padding;
+        right: @padding;
+      }
+
+      .additionalInfo {
+        padding-bottom: @line-height + 2px;
+      }
     }
   }
 
-  table {
-    margin-bottom: 0;
+  .upload-buttons {
+    margin-top: 10px;
+  }
+
+  .form-search {
+    text-align: center;
+    margin-bottom: 5px !important;
   }
 }
 
@@ -436,12 +500,14 @@ ul.dropdown-menu li a {
     text-align: left;
   }
 
-  .jog-panel > div {
-    text-align: center;
-  }
+  .jog-panel {
+    >div {
+      text-align: center;
+    }
 
-  .jog-panel > div.distance {
-    text-align: left;
+    >div.distance {
+      text-align: left;
+    }
   }
 
   .box {
@@ -536,6 +602,28 @@ ul.dropdown-menu li a {
   }
 }
 
+/** Notifications */
+
+.ui-pnotify .alert a {
+  color: #c09853;
+}
+.ui-pnotify .alert-error a,
+.ui-pnotify .alert-danger a {
+  color: #b94a48;
+}
+.ui-pnotify .alert-success a {
+  color: #468847;
+}
+.ui-pnotify .alert-info a {
+  color: #3a87ad;
+}
+
+.pnotify_additional_info {
+  .pnotify_more {
+    font-size: 85%;
+  }
+}
+
 /** General helper classes */
 
 .text-right {
@@ -546,6 +634,9 @@ ul.dropdown-menu li a {
   overflow: visible !important;
 }
 
+.hidden {
+  display: none;
+}
 
 
 #drop_overlay {
@@ -677,6 +768,13 @@ ul.dropdown-menu li a {
   background: url("../img/icon-sd-black-14.png") 0 3px no-repeat;
   width: 11px;
   height: 17px;
+  display: inline-block !important;
+}
+
+.center {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /** Styles for Bootstrap Slider */

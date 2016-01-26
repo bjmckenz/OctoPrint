@@ -23,31 +23,30 @@ except:
 
 
 __plugin_name__ = "Discovery"
-__plugin_version__ = "0.1"
 __plugin_author__ = "Gina Häußge"
 __plugin_url__ = "https://github.com/foosel/OctoPrint/wiki/Plugin:-Discovery"
 __plugin_description__ = "Makes the OctoPrint instance discoverable via Bonjour/Avahi/Zeroconf and uPnP"
 __plugin_license__ = "AGPLv3"
 
-def __plugin_init__():
+def __plugin_load__():
 	if not pybonjour:
 		# no pybonjour available, we can't use that
 		logging.getLogger("octoprint.plugins." + __name__).info("pybonjour is not installed, Zeroconf Discovery won't be available")
 
-	discovery_plugin = DiscoveryPlugin()
+	plugin = DiscoveryPlugin()
 
-	global __plugin_implementations__
-	__plugin_implementations__ = [discovery_plugin]
+	global __plugin_implementation__
+	__plugin_implementation__ = plugin
 
 	global __plugin_helpers__
 	__plugin_helpers__ = dict(
-		ssdp_browse=discovery_plugin.ssdp_browse
+		ssdp_browse=plugin.ssdp_browse
 	)
 	if pybonjour:
 		__plugin_helpers__.update(dict(
-			zeroconf_browse=discovery_plugin.zeroconf_browse,
-			zeroconf_register=discovery_plugin.zeroconf_register,
-			zeroconf_unregister=discovery_plugin.zeroconf_unregister
+			zeroconf_browse=plugin.zeroconf_browse,
+			zeroconf_register=plugin.zeroconf_register,
+			zeroconf_unregister=plugin.zeroconf_unregister
 		))
 
 class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
@@ -467,7 +466,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 		if self._settings.get(["pathPrefix"]):
 			path = self._settings.get(["pathPrefix"])
 		else:
-			prefix = self._settings.globalGet(["server", "reverseProxy", "prefixFallback"])
+			prefix = self._settings.global_get(["server", "reverseProxy", "prefixFallback"])
 			if prefix:
 				path = prefix
 
@@ -676,7 +675,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 		return upnpUuid
 
 	def get_instance_name(self):
-		name = self._settings.globalGet(["appearance", "name"])
+		name = self._settings.global_get(["appearance", "name"])
 		if name:
 			return u"OctoPrint instance \"{}\"".format(name)
 		else:

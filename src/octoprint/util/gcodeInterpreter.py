@@ -30,18 +30,20 @@ class gcode(object):
 		self.progressCallback = None
 		self._abort = False
 		self._filamentDiameter = 0
-	
-	def load(self, filename, printer_profile):
+
+	def load(self, filename, printer_profile, throttle=None):
 		if os.path.isfile(filename):
 			self.filename = filename
 			self._fileSize = os.stat(filename).st_size
-			with open(filename, "r") as f:
-				self._load(f, printer_profile)
+
+			import codecs
+			with codecs.open(filename, encoding="utf-8", errors="replace") as f:
+				self._load(f, printer_profile, throttle=throttle)
 
 	def abort(self):
 		self._abort = True
 
-	def _load(self, gcodeFile, printer_profile):
+	def _load(self, gcodeFile, printer_profile, throttle=None):
 		filePos = 0
 		readBytes = 0
 		pos = [0.0, 0.0, 0.0]
@@ -55,6 +57,9 @@ class gcode(object):
 		scale = 1.0
 		posAbs = True
 		feedRateXY = min(printer_profile["axes"]["x"]["speed"], printer_profile["axes"]["y"]["speed"])
+		if feedRateXY == 0:
+			# some somewhat sane default if axes speeds are insane...
+			feedRateXY = 2000
 		offsets = printer_profile["extruder"]["offsets"]
 
 		for line in gcodeFile:
@@ -128,7 +133,7 @@ class gcode(object):
 							pos[1] += y * scale
 						if z is not None:
 							pos[2] += z * scale
-					if f is not None:
+					if f is not None and f != 0:
 						feedRateXY = f
 
 					moveType = 'move'
@@ -233,6 +238,9 @@ class gcode(object):
 					if len(totalExtrusion) <= currentExtruder:
 						for i in range(len(totalExtrusion), currentExtruder + 1):
 							totalExtrusion.append(0.0)
+
+			if throttle is not None:
+				throttle()
 
 		if self.progressCallback is not None:
 			self.progressCallback(100.0)
